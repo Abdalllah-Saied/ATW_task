@@ -14,9 +14,21 @@ class PostController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-        $posts = $user->posts;
-        returnresponse()->json($posts);
+        try{
+            $user = Auth::user();
+            $posts = $user->posts;
+            return response()->json($posts);
+        }catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'error',
+                'error' => $th->getMessage(),
+            ], 500);
+        }catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'error',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -24,27 +36,36 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|max:255',
-            'body' => 'required',
-            'cover_image' => 'required|image',
-            'pinned' => 'required|boolean',
-            'tags' => 'required|array',
-            'tags.*' => 'exists:tags,id',
-        ]);
+        try{
+            $request->validate([
+                'title' => 'required|max:255',
+                'body' => 'required',
+                'cover_image' => 'required|image',
+                'pinned' => 'required|boolean',
+                'tags' => 'required|array',
+                'tags.*' => 'exists:tags,id',
+            ]);
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-        $post = new Post();
-        $post->title = $request->title;
-        $post->body = $request->body;
-        $post->cover_image = $request->file('cover_image')->store('images');
-        $post->pinned = $request->pinned;
+            $post = new Post();
+            $post->title = $request->title;
+            $post->body = $request->body;
+            $post->cover_image = $request->file('cover_image')->store('images');
+            $post->pinned = $request->pinned;
 
-        $user->posts()->save($post);
-        $post->tags()->attach($request->tags);
+            $user->posts()->save($post);
+            $post->tags()->attach($request->tags);
 
-        return response()->json($post, 201);
+            $post->load('tags'); // Load the tags relationship
+
+            return response()->json($post, 201);
+        }catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'error',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -52,7 +73,22 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        try{
+            $user = Auth::user();
+
+            if ($user->id !== $post->user_id) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $post->load('tags'); // Load the tags relationship
+
+            return response()->json($post);
+        }catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'error',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -60,7 +96,43 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        //
+        try{
+            $user = Auth::user();
+
+            if ($user->id !== $post->user_id) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $request->validate([
+                'title' => 'required|max:255',
+                'body' => 'required',
+                'cover_image' => 'image',
+                'pinned' => 'required|boolean',
+                'tags' => 'array',
+                'tags.*' => 'exists:tags,id',
+            ]);
+
+            $post->title = $request->title;
+            $post->body = $request->body;
+            $post->pinned = $request->pinned;
+
+            if ($request->hasFile('cover_image')) {
+                $post->cover_image = $request->file('cover_image')->store('images');
+            }
+
+            $post->tags()->sync($request->tags);
+
+            $post->save();
+
+            $post->load('tags'); // Load the tags relationship
+
+            return response()->json($post);
+        }catch (\Throwable $th){
+            return response()->json([
+                'message' => 'error',
+                'error' => $th->getMessage(),
+            ],500);
+    }
     }
 
     /**
@@ -68,6 +140,53 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        try{
+            $user = Auth::user();
+
+            if ($user->id !== $post->user_id) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $post->delete();
+            return response()->json(null, 204);
+        }catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'error',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
+    }
+    public function deletedPosts()
+    {
+        try{
+            $user = Auth::user();
+            $deletedPosts = $user->posts()->onlyTrashed()->get();
+            return response()->json($deletedPosts);
+        }catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'error',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function restoreDeletedPost($id)
+    {
+        try{
+            $user = Auth::user();
+            $post = $user->posts()->onlyTrashed()->where('id', $id)->first();
+
+            if (!$post) {
+                return response()->json(['error' => 'Post not found'], 404);
+            }
+
+            $post->restore();
+            return response()->json($post);
+        }catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'error',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
     }
 }

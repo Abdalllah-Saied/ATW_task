@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class TagController extends Controller
 {
@@ -34,10 +35,7 @@ class TagController extends Controller
             $validator = $request->validate([
                 'name' => 'required|unique:tags',
             ]);
-            if ($validator->fails()) {
 
-                return Response(['message' => $validator->errors()], 401);
-            }
             $tag = Tag::create($request->all());
             return response()->json($tag, 201);
         } catch (\Throwable $th) {
@@ -50,9 +48,22 @@ class TagController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request)
+    public function show($id)
     {
-        //
+        try{
+            $tag = Tag::find($id);
+
+            if (!$tag) {
+                return response()->json(['error' => 'Tag not found'], 404);
+            }
+
+            return response()->json($tag);
+        }catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'error',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -61,6 +72,7 @@ class TagController extends Controller
     public function update(Request $request, Tag $tag)
     {
         try{
+//            dd($request);
             $request->validate([
                 'name' => 'required|unique:tags,name,' . $tag->id,
             ]);
@@ -82,7 +94,9 @@ class TagController extends Controller
     {
         try{
             $tag->delete();
-            return response()->json(null, 204);
+            return response()->json([
+                'message' =>'tag deleted successfuly'
+            ], 204);
         }catch (\Throwable $th) {
             return response()->json([
                 'message' => 'error',
