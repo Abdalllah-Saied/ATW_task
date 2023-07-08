@@ -34,7 +34,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/deleted-posts', [PostController::class, 'deletedPosts']);
     Route::put('/restore-deleted-post/{id}', [PostController::class, 'restoreDeletedPost']);
     Route::get('/deleted-posts', [PostController::class, 'deletedPosts']);
-    //ToDo::Logout function
     //route logout
     Route::get('logout',[AuthController::class,'logout']);
 
