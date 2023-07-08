@@ -1,66 +1,94 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel API Task
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This is a Laravel API project that implements various features and functionalities as outlined in the task requirements.
 
-## About Laravel
+## Task Description
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The task involves creating a Laravel API project with the following features:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. Authentication using Sanctum
+2. User registration and login endpoints
+3. Tags API resource with CRUD operations
+4. Posts API resource with CRUD operations, including soft deletion
+5. Pinned posts appear first for every user
+6. Scheduled job to force-delete softly-deleted posts older than 30 days
+7. Scheduled job to make an HTTP request every six hours and log the response
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Requirements
 
-## Learning Laravel
+- PHP 7.4 or higher
+- Composer
+- MySQL database
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Installation
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. Clone the repository:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```
+git clone <[repository_url](https://github.com/Abdalllah-Saied/ATW_task)>
+```
 
-## Laravel Sponsors
+2. Install dependencies:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+```
+composer install
+```
 
-### Premium Partners
+3. Create a copy of the `.env.example` file and rename it to `.env`. Update the database configuration in the `.env` file with your MySQL credentials.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+4. Generate an application key:
 
-## Contributing
+```
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+5. Run the database migrations:
 
-## Code of Conduct
+```
+php artisan migrate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. (Optional) Seed the database with sample data:
 
-## Security Vulnerabilities
+```
+php artisan db:seed
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Usage
 
-## License
+1. Start the development server:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+php artisan serve
+```
+
+2. The API is now accessible at `http://localhost:8000/api`.
+
+## API Endpoints
+
+- **Register User** (POST) - `/api/register`
+- **Login User** (POST) - `/api/login`
+- **Get User Data** (GET) - `/api/user`
+- **Get All Tags** (GET) - `/api/tags`
+- **Create Tag** (POST) - `/api/tags`
+- **Get Single Tag** (GET) - `/api/tags/{id}`
+- **Update Tag** (PUT/PATCH) - `/api/tags/{id}`
+- **Delete Tag** (DELETE) - `/api/tags/{id}`
+- **Get User Posts** (GET) - `/api/posts`
+- **Create Post** (POST) - `/api/posts`
+- **Get Single Post** (GET) - `/api/posts/{id}`
+- **Update Post** (PUT/PATCH) - `/api/posts/{id}`
+- **Soft Delete Post** (DELETE) - `/api/posts/{id}`
+- **Get Deleted Posts** (GET) - `/api/posts/deleted`
+- **Restore Deleted Post** (PATCH) - `/api/posts/{id}/restore`
+- **Get Statistics** (GET) - `/api/stats`
+
+Refer to the API documentation for detailed information on request formats and responses.
+
+## Task Scheduling
+
+The project includes two scheduled jobs:
+
+- **DeleteSoftDeletedPostsJob**: This job runs daily and force-deletes all softly-deleted posts that are older than 30 days.
+
+- **MakeHttpRequestJob**: This job runs every six hours and makes an HTTP request to `https://randomuser.me/api/`. It logs the response object.
