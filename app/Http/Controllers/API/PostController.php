@@ -16,13 +16,8 @@ class PostController extends Controller
     {
         try{
             $user = Auth::user();
-            $posts = $user->posts;
+            $posts = $user->posts()->orderByDesc('pinned')->get();
             return response()->json($posts);
-        }catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'error',
-                'error' => $th->getMessage(),
-            ], 500);
         }catch (\Throwable $th) {
             return response()->json([
                 'message' => 'error',
@@ -43,7 +38,7 @@ class PostController extends Controller
                 'cover_image' => 'required|image',
                 'pinned' => 'required|boolean',
                 'tags' => 'required|array',
-                'tags.*' => 'exists:tags,id',
+                'tags.*' => 'integer|exists:tags,id',
             ]);
 
             $user = Auth::user();
@@ -102,7 +97,7 @@ class PostController extends Controller
             if ($user->id !== $post->user_id) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
-
+//            dd($post);
             $request->validate([
                 'title' => 'required|max:255',
                 'body' => 'required',
@@ -148,7 +143,10 @@ class PostController extends Controller
             }
 
             $post->delete();
-            return response()->json(null, 204);
+            return response()->json([
+                'success'=>true,
+                'message'=>'post deleted successfully'
+            ], 204);
         }catch (\Throwable $th) {
             return response()->json([
                 'message' => 'error',
